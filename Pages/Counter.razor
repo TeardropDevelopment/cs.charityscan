@@ -1,0 +1,27 @@
+﻿@page "/qr"
+@using System.Net;
+@inject IJSRuntime JS
+@using ReactorBlazorQRCodeScanner
+
+<PageTitle>QR READER</PageTitle>
+
+<QRCodeScanner />
+
+@code {
+
+    private QRCodeScannerJsInterop? _qrCodeScannerJsInterop;
+    private Action<string>? _onQrCodeScanAction;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _onQrCodeScanAction = (code) => OnQrCodeScan(code);
+
+        _qrCodeScannerJsInterop = new QRCodeScannerJsInterop(JS);
+        await _qrCodeScannerJsInterop.Init(_onQrCodeScanAction);
+    }
+
+    private static void OnQrCodeScan(string code)
+    {
+        Console.WriteLine($"OnQrCodeScan {code}");
+    }
+}
