@@ -8,9 +8,11 @@
 
 <BlazorBarcodeScanner.ZXing.JS.BarcodeReader Title="Scan Barcode from Camera"
                                              StartCameraAutomatically="true"
-                                             ShowVideoDeviceList="true"
-                                             VideoWidth="300"
-                                             VideoHeight="200"
+                                             ShowVideoDeviceList="false"
+                                             ShowStart="false"
+                                             ShowReset="false"
+                                             ShowResult="false"
+                                             ShowToggleTorch="false"
                                              OnBarcodeReceived="LocalReceivedBarcodeText" />
 
 @code {
@@ -23,25 +25,3 @@
         StateHasChanged();
     }
 }
-
-
-@*<QRCodeScanner />
-
-@code {
-
-    private QRCodeScannerJsInterop? _qrCodeScannerJsInterop;
-    private Action<string>? _onQrCodeScanAction;
-
-    protected override async Task OnInitializedAsync()
-    {
-        _onQrCodeScanAction = (code) => OnQrCodeScan(code);
-
-        _qrCodeScannerJsInterop = new QRCodeScannerJsInterop(JS);
-        await _qrCodeScannerJsInterop.Init(_onQrCodeScanAction);
-    }
-
-    private static void OnQrCodeScan(string code)
-    {
-        Console.WriteLine($"OnQrCodeScan {code}");
-    }
-}*@
