@@ -2,10 +2,30 @@
 @using System.Net;
 @inject IJSRuntime JS
 @using ReactorBlazorQRCodeScanner
+@using BlazorBarcodeScanner.ZXing.JS
 
 <PageTitle>QR READER</PageTitle>
 
-<QRCodeScanner />
+<BlazorBarcodeScanner.ZXing.JS.BarcodeReader Title="Scan Barcode from Camera"
+                                             StartCameraAutomatically="true"
+                                             ShowVideoDeviceList="true"
+                                             VideoWidth="300"
+                                             VideoHeight="200"
+                                             OnBarcodeReceived="LocalReceivedBarcodeText" />
+
+@code {
+    private string LocalBarcodeText;
+
+    private void LocalReceivedBarcodeText(BarcodeReceivedEventArgs args)
+    {
+        this.LocalBarcodeText = args.BarcodeText;
+        Console.WriteLine("Decoded Barcode: " + LocalBarcodeText);
+        StateHasChanged();
+    }
+}
+
+
+@*<QRCodeScanner />
 
 @code {
 
@@ -24,4 +44,4 @@
     {
         Console.WriteLine($"OnQrCodeScan {code}");
     }
-}
+}*@
