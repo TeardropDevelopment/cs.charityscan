@@ -14,6 +14,7 @@ function loadScanner() {
             resultContainer.innerHtml = decodedResult;
             console.log(`Scan result ${decodedText}`, decodedResult);
         };
+    }
     const config = { fps: 10, qrbox: 250 };
 
     // If you want to prefer back camera
