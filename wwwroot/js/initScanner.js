@@ -1,15 +1,12 @@
 ﻿var resultContainer;
 var lastResult, countResults = 0;
 
-function onScanSuccess
-}
-
 function loadScanner() {
 
     resultContainer = document.getElementById('qr-reader-results');
 
     const html5QrCode = new Html5Qrcode("qr-reader");
-    const qrCodeSuccessCallback = (decodedText, decodedResult) {
+    const qrCodeSuccessCallback = (decodedText, decodedResult) => {
         if (decodedText !== lastResult) {
             ++countResults;
             lastResult = decodedText;
