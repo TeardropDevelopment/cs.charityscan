@@ -6,12 +6,15 @@
 
 <PageTitle>QR READER</PageTitle>
 
-<BlazorBarcodeScanner.ZXing.JS.BarcodeReader Title="Scan Barcode from Camera"
+<div id="qr-reader" style="height:50vh;width:100vh"></div>
+<div id="qr-reader-results"></div>
+
+@*<BlazorBarcodeScanner.ZXing.JS.BarcodeReader Title="Scan Barcode from Camera"
                                              StartCameraAutomatically="true"
                                              ShowVideoDeviceList="false"
                                              ShowStart="false"
                                              ShowReset="false"
-                                             ShowResult="false"
+                                             ShowResult="true"
                                              ShowToggleTorch="false"
                                              OnBarcodeReceived="LocalReceivedBarcodeText" />
 
@@ -24,4 +27,4 @@
         Console.WriteLine("Decoded Barcode: " + LocalBarcodeText);
         StateHasChanged();
     }
-}
+}*@
