@@ -1,4 +1,4 @@
-﻿var resultContainer = document.getElementById('qr-reader-results');
+﻿var resultContainer;
 var lastResult, countResults = 0;
 
 function onScanSuccess(decodedText, decodedResult) {
@@ -10,6 +10,12 @@ function onScanSuccess(decodedText, decodedResult) {
     }
 }
 
-var html5QrcodeScanner = new Html5QrcodeScanner(
-    "qr-reader", { fps: 10, qrbox: 250 });
-html5QrcodeScanner.render(onScanSuccess);
+function loadScanner() {
+
+    resultContainer = document.getElementById('qr-reader-results');
+
+    var html5QrcodeScanner = new Html5QrcodeScanner(
+        "qr-reader", { fps: 10, qrbox: 250 });
+    html5QrcodeScanner.render(onScanSuccess);
+
+}
