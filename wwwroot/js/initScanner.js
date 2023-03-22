@@ -10,8 +10,8 @@ function loadScanner() {
             lastResult = decodedText;
             // Handle on success condition with the decoded message.
             var opt = document.createElement("option");
-            opt.innerHTML = decodedText;
-            document.getElementById("qr-reader-results").appendChild = opt;
+            opt.text = decodedText;
+            document.getElementById("qr-reader-results").appendChild(opt);
 
             console.log(document.getElementById("qr-reader-results"));
 
