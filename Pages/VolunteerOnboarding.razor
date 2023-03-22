@@ -30,3 +30,10 @@
         StateHasChanged();
     }
 }*@
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await JS.InvokeAsync<Task>("loadScanner", new object[]{});
+    }
+}

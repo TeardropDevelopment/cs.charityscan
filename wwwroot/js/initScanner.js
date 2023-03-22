@@ -15,10 +15,6 @@ function loadScanner() {
 
     resultContainer = document.getElementById('qr-reader-results');
 
-    var html5QrcodeScanner = new Html5QrcodeScanner(
-        "qr-reader", { fps: 10, qrbox: 250 });
-    html5QrcodeScanner.render(onScanSuccess);
-
     const html5QrCode = new Html5Qrcode("qr-reader");
     const qrCodeSuccessCallback = onScanSuccess;
     const config = { fps: 10, qrbox: 250 };
