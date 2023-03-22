@@ -19,4 +19,11 @@ function loadScanner() {
         "qr-reader", { fps: 10, qrbox: 250 });
     html5QrcodeScanner.render(onScanSuccess);
 
+    const html5QrCode = new Html5Qrcode("qr-reader");
+    const qrCodeSuccessCallback = onScanSuccess;
+    const config = { fps: 10, qrbox: 250 };
+
+    // If you want to prefer back camera
+    html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback);
+
 }
