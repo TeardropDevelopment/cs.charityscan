@@ -13,7 +13,9 @@ function loadScanner() {
             console.log(`Scan result ${decodedText}`, decodedResult);
         };
     }
-    const config = { fps: 10, qrbox: 250 };
+    const config = {
+        fps: 10, qrbox: { height: 250, width: 250 }
+    };
 
     // If you want to prefer back camera
     html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback);
