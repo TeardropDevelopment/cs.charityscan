@@ -9,7 +9,10 @@ function loadScanner() {
             ++countResults;
             lastResult = decodedText;
             // Handle on success condition with the decoded message.
-            document.getElementById("qr-reader-results").innerHTML = decodedResult;
+            document.getElementById("qr-reader-results").innerHTML = decodedText;
+
+            console.log(document.getElementById("qr-reader-results"));
+
             console.log(`Scan result ${decodedText}`, decodedResult);
         };
     }
