@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using cs.api.charityscan.Entities;
+using CharityScanWebApp.Entities;
 
 namespace cs.api.charityscan.Controllers
 {
@@ -18,17 +18,6 @@ namespace cs.api.charityscan.Controllers
         public EventCodesController(CharityscanDevContext context)
         {
             _context = context;
-        }
-
-        // GET: api/EventCodes
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<EventCode>>> GetEventCodes()
-        {
-          if (_context.EventCodes == null)
-          {
-              return NotFound();
-          }
-            return await _context.EventCodes.ToListAsync();
         }
 
         // GET: api/EventCodes/5
@@ -47,6 +36,41 @@ namespace cs.api.charityscan.Controllers
             }
 
             return eventCode;
+        }
+
+        // GET: api/EventCodes?value=
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<EventCode>>> GetEventCodeByValue([FromQuery] string value = "")
+        {
+            var eventCodes = await _context.EventCodes.ToListAsync();
+
+            if (eventCodes == null || !eventCodes.Any())
+            {
+                return NotFound();
+            }
+
+            if (value != "")
+            {
+                EventCode? eventCode = null;
+
+                foreach(var ec in eventCodes)
+                {
+                    if(ec.Value.Equals(value))
+                    {
+                        eventCode = ec;
+                        break;
+                    }
+                }
+
+                if (eventCode == null)
+                {
+                    return NotFound();
+                }
+
+                return new List<EventCode>() { eventCode };
+            }
+
+            return eventCodes;
         }
 
         // PUT: api/EventCodes/5

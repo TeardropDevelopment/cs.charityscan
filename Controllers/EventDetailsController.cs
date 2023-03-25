@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using cs.api.charityscan.Entities;
+using CharityScanWebApp.Entities;
 
 namespace cs.api.charityscan.Controllers
 {

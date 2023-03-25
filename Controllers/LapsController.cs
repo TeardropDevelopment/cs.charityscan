@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using cs.api.charityscan.Entities;
+using CharityScanWebApp.Entities;
 
 namespace cs.api.charityscan.Controllers
 {
@@ -83,16 +83,21 @@ namespace cs.api.charityscan.Controllers
         // POST: api/Laps
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Lap>> PostLap(Lap lap)
+        public async Task<ActionResult<Lap>> PostLap(int event_id, string value, int? starter_nr = null)
         {
           if (_context.Laps == null)
           {
               return Problem("Entity set 'CharityscanDevContext.Laps'  is null.");
           }
-            _context.Laps.Add(lap);
+            _context.Laps.Add(new Lap
+            {
+                EventId = event_id,
+                StarterNr = starter_nr,
+                Value = value
+            });
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetLap", new { id = lap.Id }, lap);
+            return StatusCode(StatusCodes.Status201Created);
         }
 
         // DELETE: api/Laps/5

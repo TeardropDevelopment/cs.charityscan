@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using cs.api.charityscan.Entities;
+using CharityScanWebApp.Entities;
 
 namespace cs.api.charityscan.Controllers
 {
@@ -40,6 +40,42 @@ namespace cs.api.charityscan.Controllers
               return NotFound();
           }
             var code = await _context.Codes.FindAsync(id);
+
+            if (code == null)
+            {
+                return NotFound();
+            }
+
+            return code;
+        }
+
+        // GET: api/Codes/athlete/5
+        [HttpGet("athlete/{id}")]
+        public async Task<ActionResult<Code>> GetCodeFromAthleteId(int id)
+        {
+            if (_context.Codes == null)
+            {
+                return NotFound();
+            }
+            var code = await _context.Codes.FirstAsync(c => c.AthleteId == id);
+
+            if (code == null)
+            {
+                return NotFound();
+            }
+
+            return code;
+        }
+
+        // GET: api/Codes/event/5
+        [HttpGet("event/{id}")]
+        public async Task<ActionResult<Code>> GetCodeFromEventId(int id)
+        {
+            if (_context.Codes == null)
+            {
+                return NotFound();
+            }
+            var code = await _context.Codes.FirstAsync(c => c.EventId == id);
 
             if (code == null)
             {

@@ -1,4 +1,4 @@
-﻿using cs.api.charityscan.Entities;
+﻿using CharityScanWebApp.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

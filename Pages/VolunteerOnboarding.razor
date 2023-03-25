@@ -1,13 +1,17 @@
 ﻿@page "/volunteer"
 @using System.Net;
-@inject IJSRuntime JS
-@using ReactorBlazorQRCodeScanner
-@using BlazorBarcodeScanner.ZXing.JS
+@inject IJSRuntime JS;
+@using Microsoft.JSInterop.Implementation;
+@using ReactorBlazorQRCodeScanner;
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using CharityScanWebApp.Entities;
+@inject ProtectedSessionStorage SessionStorage
+@inject NavigationManager uriHelper;
 
-<PageTitle>QR READER</PageTitle>
+<PageTitle>Volunteering</PageTitle>
 
 <div id="qr-reader" style="width: 100%"></div>
-<select id="qr-reader-results"></select>
+
 
 @*<BlazorBarcodeScanner.ZXing.JS.BarcodeReader Title="Scan Barcode from Camera"
                                              StartCameraAutomatically="true"
@@ -30,9 +34,120 @@
 }*@
 
 @code {
+
+    HttpClient client = new HttpClient()
+        {
+            //BaseAddress = new Uri("https://130.61.142.115/api/v1/")
+            BaseAddress = new Uri("https://localhost/api/v1/")
+        };
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if(firstRender)
-            await JS.InvokeVoidAsync("loadScanner");
+        try
+        {
+            if (!firstRender) return;
+
+
+            if ((await SessionStorage.GetAsync<bool>("IsVolunteer")).Value) {
+                await JS.InvokeAsync<object>("scannerProxy", CreateDotNetObjectRef(this), "ScanLapBarcodeCallback").ConfigureAwait(false);
+            }
+            else {
+                // Fire & Forget: ConfigureAwait(false) is telling "I'm not expecting this call to return a thing"
+                await JS.InvokeAsync<object>("scannerProxy", CreateDotNetObjectRef(this), "VolunteerLogIn").ConfigureAwait(false);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
+
+    [JSInvokable]
+    public async void VolunteerLogIn(string scannedText)
+    {
+        try
+        {
+            var s = await client.GetFromJsonAsync<List<EventCode>>("eventcodes?value=" + scannedText);
+
+            if (s == null || !s.Any())
+                return;
+
+            await SessionStorage.SetAsync("IsVolunteer", true);
+            await SessionStorage.SetAsync("VolunteerAtEvent", s.First().EventId);
+
+            await JS.InvokeVoidAsync("alert", "Registriert bei Event " + s.First().EventId); // Alert
+
+            uriHelper.NavigateTo(uriHelper.Uri, true);
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            await Alert("Bitte einen Eventcode scannen!");
+            uriHelper.NavigateTo(uriHelper.Uri, true);
+        }
+    }
+
+    [JSInvokable]
+    public async void ScanLapBarcodeCallback(string barcode)
+    {
+
+        int eventId = (await SessionStorage.GetAsync<int>("VolunteerAtEvent")).Value;
+
+        Console.WriteLine("Scanned lap for event: " + eventId);
+
+        HttpResponseMessage response;
+        if(barcode.EndsWith("-SCAN"))
+        {
+            // ASK PERSON TO INPUT STARTER NR
+            string starterNr = await JS.InvokeAsync<string>("prompt", "Bitte Starter Nummer eingeben: ");
+            Console.WriteLine(starterNr);
+
+            response = await client.PostAsync($"Laps?event_id={eventId}&value={barcode}&starter_nr={starterNr}", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await JS.InvokeVoidAsync("resumeScanner");
+                return;
+            }
+
+            await Alert("Bitte nochmal probieren!");
+
+            await JS.InvokeVoidAsync("resumeScanner");
+            return;
+        }
+
+        // input into database
+        response = await client.PostAsync($"Laps?event_id={eventId}&value={barcode}", null);
+
+        if (response.IsSuccessStatusCode)
+        {
+            await JS.InvokeVoidAsync("resumeScanner");
+            return;
+        }
+
+        await Alert("Bitte nochmal probieren!");
+
+        await JS.InvokeVoidAsync("resumeScanner");
+        return;
+
+    }
+
+    public static object CreateDotNetObjectRefSyncObj = new object();
+
+    // Hack to fix https://github.com/aspnet/AspNetCore/issues/11159
+    protected DotNetObjectReference<T> CreateDotNetObjectRef<T>(T value) where T : class
+    {
+        lock (CreateDotNetObjectRefSyncObj)
+        {
+            return DotNetObjectReference.Create(value);
+        }
+    }
+
+    private async Task Alert(string msg)
+    {
+        await JS.InvokeVoidAsync("alert", msg); // Alert
+    }
+
 }

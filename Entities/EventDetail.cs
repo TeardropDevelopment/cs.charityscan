@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace cs.api.charityscan.Entities;
+namespace CharityScanWebApp.Entities;
 
 public partial class EventDetail
 {

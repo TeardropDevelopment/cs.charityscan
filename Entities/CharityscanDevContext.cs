@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace cs.api.charityscan.Entities;
+namespace CharityScanWebApp.Entities;
 
 public partial class CharityscanDevContext : DbContext
 {
@@ -33,7 +33,7 @@ public partial class CharityscanDevContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySQL("server=130.61.142.115; database=charityscan_dev; user=remote; password=T34rDr0p_D3v3l0pm3nt");
+        => optionsBuilder.UseMySQL("Database=charityscan_dev;Server=130.61.142.115;UID=remote;PWD=T34rDr0p_D3v3l0pm3nt;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -176,23 +176,19 @@ public partial class CharityscanDevContext : DbContext
 
             entity.ToTable("LAPS");
 
-            entity.HasIndex(e => e.AthleteId, "LAPS_fk0");
-
-            entity.HasIndex(e => e.EventId, "LAPS_fk1");
+            entity.HasIndex(e => e.EventId, "LAPS_fk0");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.AthleteId).HasColumnName("athlete_id");
             entity.Property(e => e.EventId).HasColumnName("event_id");
             entity.Property(e => e.StarterNr).HasColumnName("starter_nr");
-
-            entity.HasOne(d => d.Athlete).WithMany(p => p.Laps)
-                .HasForeignKey(d => d.AthleteId)
-                .HasConstraintName("LAPS_fk0");
+            entity.Property(e => e.Value)
+                .HasMaxLength(255)
+                .HasColumnName("value");
 
             entity.HasOne(d => d.Event).WithMany(p => p.Laps)
                 .HasForeignKey(d => d.EventId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("LAPS_fk1");
+                .HasConstraintName("LAPS_fk0");
         });
 
         modelBuilder.Entity<Volunteer>(entity =>
