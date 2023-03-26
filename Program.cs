@@ -1,4 +1,3 @@
-using CharityScanWebApp.Data;
 using CharityScanWebApp.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,7 +6,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<UserDataService>();
 
 // Add WebAPI
 builder.Services.AddControllers();

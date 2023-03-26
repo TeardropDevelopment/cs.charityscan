@@ -2,7 +2,6 @@
 @using System.Net;
 @inject IJSRuntime JS;
 @using Microsoft.JSInterop.Implementation;
-@using ReactorBlazorQRCodeScanner;
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using CharityScanWebApp.Entities;
 @inject ProtectedSessionStorage SessionStorage
@@ -11,27 +10,6 @@
 <PageTitle>Volunteering</PageTitle>
 
 <div id="qr-reader" style="width: 100%"></div>
-
-
-@*<BlazorBarcodeScanner.ZXing.JS.BarcodeReader Title="Scan Barcode from Camera"
-                                             StartCameraAutomatically="true"
-                                             ShowVideoDeviceList="false"
-                                             ShowStart="false"
-                                             ShowReset="false"
-                                             ShowResult="true"
-                                             ShowToggleTorch="false"
-                                             OnBarcodeReceived="LocalReceivedBarcodeText" />
-
-@code {
-    private string LocalBarcodeText;
-
-    private void LocalReceivedBarcodeText(BarcodeReceivedEventArgs args)
-    {
-        this.LocalBarcodeText = args.BarcodeText;
-        Console.WriteLine("Decoded Barcode: " + LocalBarcodeText);
-        StateHasChanged();
-    }
-}*@
 
 @code {
 
@@ -53,11 +31,11 @@
 
 
             if ((await SessionStorage.GetAsync<bool>("IsVolunteer")).Value) {
-                await JS.InvokeAsync<object>("scannerProxy", CreateDotNetObjectRef(this), "ScanLapBarcodeCallback").ConfigureAwait(false);
+                await JS.InvokeAsync<object>("scannerProxy", CreateDotNetObjectRef(this), nameof(ScanLapBarcodeCallback)).ConfigureAwait(false);
             }
             else {
                 // Fire & Forget: ConfigureAwait(false) is telling "I'm not expecting this call to return a thing"
-                await JS.InvokeAsync<object>("scannerProxy", CreateDotNetObjectRef(this), "VolunteerLogIn").ConfigureAwait(false);
+                await JS.InvokeAsync<object>("scannerProxy", CreateDotNetObjectRef(this), nameof(VolunteerLogIn)).ConfigureAwait(false);
             }
         }
         catch (Exception ex)
@@ -79,7 +57,7 @@
             await SessionStorage.SetAsync("IsVolunteer", true);
             await SessionStorage.SetAsync("VolunteerAtEvent", s.First().EventId);
 
-            await JS.InvokeVoidAsync("alert", "Registriert bei Event " + s.First().EventId); // Alert
+            await Alert("Registriert bei Event " + s.First().EventId); // Alert
 
             uriHelper.NavigateTo(uriHelper.Uri, true);
 
@@ -89,52 +67,52 @@
         {
             Console.WriteLine(ex.Message);
             await Alert("Bitte einen Eventcode scannen!");
-            uriHelper.NavigateTo(uriHelper.Uri, true);
+            await JS.InvokeVoidAsync("resumeScanner");
         }
     }
 
     [JSInvokable]
     public async void ScanLapBarcodeCallback(string barcode)
     {
-
-        int eventId = (await SessionStorage.GetAsync<int>("VolunteerAtEvent")).Value;
-
-        Console.WriteLine("Scanned lap for event: " + eventId);
-
-        HttpResponseMessage response;
-        if(barcode.EndsWith("-SCAN"))
+        try
         {
-            // ASK PERSON TO INPUT STARTER NR
-            string starterNr = await JS.InvokeAsync<string>("prompt", "Bitte Starter Nummer eingeben: ");
-            Console.WriteLine(starterNr);
+            int eventId = (await SessionStorage.GetAsync<int>("VolunteerAtEvent")).Value;
 
-            response = await client.PostAsync($"Laps?event_id={eventId}&value={barcode}&starter_nr={starterNr}", null);
+            Console.WriteLine("Scanned lap for event: " + eventId);
 
-            if (response.IsSuccessStatusCode)
+            HttpResponseMessage response;
+            if (barcode.EndsWith("-SCAN"))
             {
-                await JS.InvokeVoidAsync("resumeScanner");
+                // ASK PERSON TO INPUT STARTER NR
+                string starterNr = await JS.InvokeAsync<string>("prompt", "Bitte Starter Nummer eingeben: ");
+                Console.WriteLine(starterNr);
+
+                response = await client.PostAsync($"Laps?event_id={eventId}&value={barcode}&starter_nr={starterNr}", null);
+
+                if (response.IsSuccessStatusCode)
+                    return;
+
+                await Alert("Bitte nochmal probieren!");
                 return;
             }
 
+            // input into database
+            response = await client.PostAsync($"Laps?event_id={eventId}&value={barcode}", null);
+
+            if (response.IsSuccessStatusCode)
+                return;
+
             await Alert("Bitte nochmal probieren!");
-
-            await JS.InvokeVoidAsync("resumeScanner");
             return;
+        } 
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
         }
-
-        // input into database
-        response = await client.PostAsync($"Laps?event_id={eventId}&value={barcode}", null);
-
-        if (response.IsSuccessStatusCode)
+        finally
         {
             await JS.InvokeVoidAsync("resumeScanner");
-            return;
         }
-
-        await Alert("Bitte nochmal probieren!");
-
-        await JS.InvokeVoidAsync("resumeScanner");
-        return;
 
     }
 
