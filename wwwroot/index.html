@@ -3,13 +3,18 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>BlazorApp-empty1</title>
-    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="~/" />
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link href="css/app.css" rel="stylesheet" />
     <link href="manifest.json" rel="manifest" />
-    
-    <!-- If you add any scoped CSS files, uncomment the following to load them
-    <link href="BlazorApp_empty1.Client.styles.css" rel="stylesheet" /> -->
+    <link href="CharityScanWebApp.styles.css" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
+
+    <!-- Barcode Reader -->
+    <script src="~/js/html5-qrcode.min.js"></script>
+    <script src="~/js/qrcode.js"></script>
 </head>
 
 <body>

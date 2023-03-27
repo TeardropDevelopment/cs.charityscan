@@ -1,11 +1,16 @@
 ﻿@page "/volunteer"
 @using System.Net;
 @inject IJSRuntime JS;
+@using CharityScanWebApp.Helpers;
+@using CharityScanWebApp.Services;
 @using Microsoft.JSInterop.Implementation;
-@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 @using CharityScanWebApp.Entities;
-@inject ProtectedSessionStorage SessionStorage
+@using System.Text.RegularExpressions;
+@inject ProtectedSessionStorage SessionStorage;
 @inject NavigationManager uriHelper;
+@inject JsHelperService JsHelper;
+@inject BarcodeReaderService readerService;
 
 <PageTitle>Volunteering</PageTitle>
 
@@ -18,10 +23,10 @@
         {
             ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; }
         })
-        {
-            //BaseAddress = new Uri("https://130.61.142.115/api/v1/")
-            BaseAddress = new Uri("https://192.168.50.5/api/v1/")
-        };
+    {
+        BaseAddress = new Uri("https://130.61.142.115/api/v1/")
+        //BaseAddress = new Uri("https://192.168.50.5/api/v1/")
+    };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -29,14 +34,7 @@
         {
             if (!firstRender) return;
 
-
-            if ((await SessionStorage.GetAsync<bool>("IsVolunteer")).Value) {
-                await JS.InvokeAsync<object>("scannerProxy", CreateDotNetObjectRef(this), nameof(ScanLapBarcodeCallback)).ConfigureAwait(false);
-            }
-            else {
-                // Fire & Forget: ConfigureAwait(false) is telling "I'm not expecting this call to return a thing"
-                await JS.InvokeAsync<object>("scannerProxy", CreateDotNetObjectRef(this), nameof(VolunteerLogIn)).ConfigureAwait(false);
-            }
+            await readerService.StartAsync(nameof(QrCodeCallback), this);
         }
         catch (Exception ex)
         {
@@ -45,11 +43,36 @@
     }
 
     [JSInvokable]
-    public async void VolunteerLogIn(string scannedText)
+    public async Task QrCodeCallback(string result)
     {
         try
         {
-            var s = await client.GetFromJsonAsync<List<EventCode>>("eventcodes?value=" + scannedText);
+            Console.WriteLine(result);
+
+            if (Regex.Match(result, @"^\d{6}-[A-Z]{2}-\d{4}-\d{4}$").Success)
+            {
+                await RegisterAsVolunteerAsync(result);
+                return;
+            }
+
+            await ProcessLapAsync(result);
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+        finally
+        {
+            await readerService.ResumeAsync();
+        }
+    }
+
+    public async Task RegisterAsVolunteerAsync(string barcode)
+    {
+        try
+        {
+            var s = await client.GetFromJsonAsync<List<EventCode>>("eventcodes?value=" + barcode);
 
             if (s == null || !s.Any())
                 return;
@@ -57,22 +80,18 @@
             await SessionStorage.SetAsync("IsVolunteer", true);
             await SessionStorage.SetAsync("VolunteerAtEvent", s.First().EventId);
 
-            await Alert("Registriert bei Event " + s.First().EventId); // Alert
+            await JsHelper.Alert("Registriert bei Event " + s.First().EventId); // Alert
 
             uriHelper.NavigateTo(uriHelper.Uri, true);
-
             StateHasChanged();
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
-            await Alert("Bitte einen Eventcode scannen!");
-            await JS.InvokeVoidAsync("resumeScanner");
+            await JsHelper.Alert("Dieses Event wurde nicht gefunden!");
         }
     }
 
-    [JSInvokable]
-    public async void ScanLapBarcodeCallback(string barcode)
+    public async Task ProcessLapAsync(string barcode)
     {
         try
         {
@@ -81,55 +100,36 @@
             Console.WriteLine("Scanned lap for event: " + eventId);
 
             HttpResponseMessage response;
-            if (barcode.EndsWith("-SCAN"))
+
+            // To ensure its for the same event. Otherwise treat it as a regular code
+            if (barcode.StartsWith(eventId.ToString()) && barcode.EndsWith("-SCAN"))
             {
                 // ASK PERSON TO INPUT STARTER NR
-                string starterNr = await JS.InvokeAsync<string>("prompt", "Bitte Starter Nummer eingeben: ");
-                Console.WriteLine(starterNr);
+                string starterNr = await JsHelper.Prompt("Bitte Starter Nummer eingeben:");
 
                 response = await client.PostAsync($"Laps?event_id={eventId}&value={barcode}&starter_nr={starterNr}", null);
 
                 if (response.IsSuccessStatusCode)
                     return;
 
-                await Alert("Bitte nochmal probieren!");
+                // TODO: Replace with visual feedback
+                await JsHelper.Alert("Bitte nochmal probieren!");
                 return;
             }
 
-            // input into database
+            // add into database
             response = await client.PostAsync($"Laps?event_id={eventId}&value={barcode}", null);
 
             if (response.IsSuccessStatusCode)
                 return;
 
-            await Alert("Bitte nochmal probieren!");
+            await JsHelper.Alert("Bitte nochmal probieren!");
             return;
-        } 
+        }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
         }
-        finally
-        {
-            await JS.InvokeVoidAsync("resumeScanner");
-        }
 
     }
-
-    public static object CreateDotNetObjectRefSyncObj = new object();
-
-    // Hack to fix https://github.com/aspnet/AspNetCore/issues/11159
-    protected DotNetObjectReference<T> CreateDotNetObjectRef<T>(T value) where T : class
-    {
-        lock (CreateDotNetObjectRefSyncObj)
-        {
-            return DotNetObjectReference.Create(value);
-        }
-    }
-
-    private async Task Alert(string msg)
-    {
-        await JS.InvokeVoidAsync("alert", msg); // Alert
-    }
-
 }

@@ -1,11 +1,16 @@
 using CharityScanWebApp.Entities;
+using CharityScanWebApp.Helpers;
+using CharityScanWebApp.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.JSInterop;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddScoped<JsHelperService>();
+builder.Services.AddScoped<BarcodeReaderService>();
 
 // Add WebAPI
 builder.Services.AddControllers();
