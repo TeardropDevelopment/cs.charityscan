@@ -11,6 +11,7 @@
 @inject NavigationManager uriHelper;
 @inject JsHelperService JsHelper;
 @inject BarcodeReaderService readerService;
+@inject SwalService swalService;
 
 <PageTitle>Volunteering</PageTitle>
 
@@ -38,7 +39,7 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            System.Console.WriteLine(ex.Message);
         }
     }
 
@@ -50,7 +51,7 @@
 
         try
         {
-            Console.WriteLine(result);
+            System.Console.WriteLine(result);
 
             if (Regex.Match(result, @"^\d{6}-[A-Z]{2}-\d{4}-\d{4}$").Success)
             {
@@ -83,14 +84,16 @@
             await SessionStorage.SetAsync("IsVolunteer", true);
             await SessionStorage.SetAsync("VolunteerAtEvent", s.First().EventId);
 
-            await JsHelper.Alert("Registriert bei Event " + s.First().EventId); // Alert
+            //await JsHelper.Alert("Registriert bei Event " + s.First().EventId); // Alert
+            await ShowModal(true);
 
-            uriHelper.NavigateTo(uriHelper.Uri, true);
+            //uriHelper.NavigateTo(uriHelper.Uri, true);
             StateHasChanged();
         }
         catch (Exception ex)
         {
-            await JsHelper.Alert("Dieses Event wurde nicht gefunden!");
+            //await JsHelper.Alert("Dieses Event wurde nicht gefunden!");
+            await ShowModal(false);
         }
     }
 
@@ -100,7 +103,7 @@
         {
             int eventId = (await SessionStorage.GetAsync<int>("VolunteerAtEvent")).Value;
 
-            Console.WriteLine("Scanned lap for event: " + eventId);
+            System.Console.WriteLine("Scanned lap for event: " + eventId);
 
             HttpResponseMessage response;
 
@@ -116,7 +119,8 @@
                     return;
 
                 // TODO: Replace with visual feedback
-                await JsHelper.Alert("Bitte nochmal probieren!");
+                //await JsHelper.Alert("Bitte nochmal probieren!");
+                await ShowModal(false);
                 return;
             }
 
@@ -126,13 +130,40 @@
             if (response.IsSuccessStatusCode)
                 return;
 
-            await JsHelper.Alert("Bitte nochmal probieren!");
+            //await JsHelper.Alert("Bitte nochmal probieren!");
+            await ShowModal(false);
             return;
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            System.Console.WriteLine(ex);
         }
 
+    }
+
+    protected async Task ShowModal(bool success)
+    {
+        if (success) {
+            var op = new SwalOption()
+                {
+                    Category = SwalCategory.Success,
+                    IsAutoHide = true,
+                    ShowClose = false,
+                    Delay = 1500
+                };
+            await swalService.Show(op);
+            return;
+        }
+
+        var opError = new SwalOption()
+            {
+                Category = SwalCategory.Error,
+                Title = "Oops...",
+                Content = "Something went wrong!",
+                ShowClose = false,
+                IsAutoHide = true,
+                Delay = 1500
+            };
+        await swalService.Show(opError);
     }
 }

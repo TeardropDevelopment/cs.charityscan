@@ -9,16 +9,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="~/" />
+
+    <!-- Bootstrap Blazor -->
+    <link href="_content/BootstrapBlazor.FontAwesome/css/font-awesome.min.css" rel="stylesheet">
+    <link href="_content/BootstrapBlazor/css/bootstrap.blazor.bundle.min.css" rel="stylesheet">
+
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link href="css/site.css" rel="stylesheet" />
     <link href="manifest.json" rel="manifest" />
     <link href="CharityScanWebApp.styles.css" rel="stylesheet" />
     <link rel="icon" type="image/png" href="favicon.png"/>
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
-
-    <!-- Barcode Reader -->
-    <script src="~/js/html5-qrcode.min.js"></script>
-    <script src="~/js/qrcode.js"></script>
 
 </head>
 <body>
@@ -37,5 +38,10 @@
 
     <script src="_framework/blazor.server.js"></script>
     <script>navigator.serviceWorker.register('service-worker.js');</script>
+    <script src="_content/BootstrapBlazor/js/bootstrap.blazor.bundle.min.js"></script>
+
+    <!-- Barcode Reader -->
+    <script src="~/js/html5-qrcode.min.js"></script>
+    <script src="~/js/qrcode.js"></script>
 </body>
 </html>
