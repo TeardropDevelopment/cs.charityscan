@@ -14,8 +14,9 @@
 @inject SessionService session;
 
 <PageTitle>Volunteering</PageTitle>
+<IsBusy />
 
-<div id="qr-reader" style="width: 100%"></div>
+<div id="qr-reader" style="width: 100%;"></div>
 
 @code {
 
@@ -52,6 +53,7 @@
         try
         {
             System.Console.WriteLine(result);
+            IsBusy.IsLoading = true;
 
             if (Regex.Match(result, @"^\d{6}-[A-Z]{2}-\d{4}-\d{4}$").Success)
             {
@@ -75,6 +77,7 @@
         finally
         {
             await readerService.ResumeAsync();
+            IsBusy.IsLoading = false;
         }
     }
 
@@ -94,7 +97,8 @@
         }
         catch (Exception ex)
         {
-            await readerService.ShowError("Dieses Event wurde nicht gefunden!");
+            //await readerService.ShowError("Dieses Event wurde nicht gefunden!");
+            await readerService.ShowError(ex.Message);
         }
     }
 
