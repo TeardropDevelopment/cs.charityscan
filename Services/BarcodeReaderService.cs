@@ -1,4 +1,5 @@
-﻿using CharityScanWebApp.Helpers;
+﻿using BootstrapBlazor.Components;
+using CharityScanWebApp.Helpers;
 using Microsoft.JSInterop;
 
 namespace CharityScanWebApp.Services
@@ -9,11 +10,12 @@ namespace CharityScanWebApp.Services
     public class BarcodeReaderService
     {
         private readonly JsHelperService JS;
-        private readonly string htmlElement = "html5QrCode";
+        private readonly SwalService swalService;
 
-        public BarcodeReaderService(JsHelperService js_helper_service) 
+        public BarcodeReaderService(JsHelperService js_helper_service, SwalService swal) 
         {
             JS = js_helper_service;
+            swalService = swal;
         }
 
         public async Task StartAsync(string callback, object clazz)
@@ -36,6 +38,42 @@ namespace CharityScanWebApp.Services
             await InvokeAsync("resume");
         }
 
+        public async Task ShowSuccess(string message)
+        {
+            var op = new SwalOption()
+            {
+                Category = SwalCategory.Success,
+                IsAutoHide = true,
+                ShowClose = false,
+                Title = message,
+                Delay = 1500
+            };
+            await swalService.Show(op);
+        }
+
+        public async Task ShowError(string message)
+        {
+            var op = new SwalOption()
+            {
+                Category = SwalCategory.Error,
+                IsAutoHide = true,
+                ShowClose = false,
+                Title = message,
+                Delay = 1500
+            };
+            await swalService.Show(op);
+        }
+
+        public async Task ShowModal(bool success, string onSuccessMsg, string onErrorMsg)
+        {
+            if(success)
+            {
+                await ShowSuccess(onSuccessMsg);
+                return;
+            }
+
+            await ShowError(onErrorMsg);
+        }
 
         #region private
 

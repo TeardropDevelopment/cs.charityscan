@@ -1,6 +1,5 @@
 ﻿@page "/volunteer"
 @using System.Net;
-@inject IJSRuntime JS;
 @using CharityScanWebApp.Helpers;
 @using CharityScanWebApp.Services;
 @using Microsoft.JSInterop.Implementation;
@@ -11,7 +10,8 @@
 @inject NavigationManager uriHelper;
 @inject JsHelperService JsHelper;
 @inject BarcodeReaderService readerService;
-@inject SwalService swalService;
+@inject APIService api;
+@inject SessionService session;
 
 <PageTitle>Volunteering</PageTitle>
 
@@ -57,7 +57,13 @@
             {
                 await RegisterAsVolunteerAsync(result);
                 return;
+            } 
+            else if(!await session.IsVolunteer())
+            {
+                await readerService.ShowError("Bitte zuerst als Helfer registrieren!");
+                return;
             }
+
 
             await ProcessLapAsync(result);
         }
@@ -81,19 +87,14 @@
             if (s == null || !s.Any())
                 return;
 
-            await SessionStorage.SetAsync("IsVolunteer", true);
-            await SessionStorage.SetAsync("VolunteerAtEvent", s.First().EventId);
+            await session.RegisterVolunteer(s.First().EventId);
 
-            //await JsHelper.Alert("Registriert bei Event " + s.First().EventId); // Alert
-            await ShowModal(true);
-
-            //uriHelper.NavigateTo(uriHelper.Uri, true);
+            await readerService.ShowSuccess("Erfolgreich angemeldet");
             StateHasChanged();
         }
         catch (Exception ex)
         {
-            //await JsHelper.Alert("Dieses Event wurde nicht gefunden!");
-            await ShowModal(false);
+            await readerService.ShowError("Dieses Event wurde nicht gefunden!");
         }
     }
 
@@ -101,69 +102,29 @@
     {
         try
         {
-            int eventId = (await SessionStorage.GetAsync<int>("VolunteerAtEvent")).Value;
-
-            System.Console.WriteLine("Scanned lap for event: " + eventId);
-
-            HttpResponseMessage response;
+            int eventId = await session.GetEventId();
+            bool success;
 
             // To ensure its for the same event. Otherwise treat it as a regular code
             if (barcode.StartsWith(eventId.ToString()) && barcode.EndsWith("-SCAN"))
             {
-                // ASK PERSON TO INPUT STARTER NR
-                string starterNr = await JsHelper.Prompt("Bitte Starter Nummer eingeben:");
-
-                response = await client.PostAsync($"Laps?event_id={eventId}&value={barcode}&starter_nr={starterNr}", null);
-
-                if (response.IsSuccessStatusCode)
-                    return;
-
-                // TODO: Replace with visual feedback
-                //await JsHelper.Alert("Bitte nochmal probieren!");
-                await ShowModal(false);
-                return;
+                string nr = await JsHelper.Prompt("Bitte Startnummer eingeben:");
+                success = await api.AddLapToEventAsync(eventId, barcode, nr);
+            }
+            else
+            {
+                // add into database
+                success = await api.AddLapToEventAsync(eventId, barcode);
             }
 
-            // add into database
-            response = await client.PostAsync($"Laps?event_id={eventId}&value={barcode}", null);
+            await readerService.ShowModal(success, "", "Bitte nochmal probieren");
 
-            if (response.IsSuccessStatusCode)
-                return;
-
-            //await JsHelper.Alert("Bitte nochmal probieren!");
-            await ShowModal(false);
-            return;
         }
         catch (Exception ex)
         {
             System.Console.WriteLine(ex);
+            await readerService.ShowError("Bitte nochmal probieren");
         }
 
-    }
-
-    protected async Task ShowModal(bool success)
-    {
-        if (success) {
-            var op = new SwalOption()
-                {
-                    Category = SwalCategory.Success,
-                    IsAutoHide = true,
-                    ShowClose = false,
-                    Delay = 1500
-                };
-            await swalService.Show(op);
-            return;
-        }
-
-        var opError = new SwalOption()
-            {
-                Category = SwalCategory.Error,
-                Title = "Oops...",
-                Content = "Something went wrong!",
-                ShowClose = false,
-                IsAutoHide = true,
-                Delay = 1500
-            };
-        await swalService.Show(opError);
     }
 }

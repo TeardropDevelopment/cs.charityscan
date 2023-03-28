@@ -11,6 +11,8 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<JsHelperService>();
 builder.Services.AddScoped<BarcodeReaderService>();
+builder.Services.AddScoped<APIService>();
+builder.Services.AddScoped<SessionService>();
 builder.Services.AddBootstrapBlazor();
 
 // Add WebAPI
