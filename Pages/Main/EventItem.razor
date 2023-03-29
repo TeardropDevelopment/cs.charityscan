@@ -1,0 +1,45 @@
+﻿
+<div class="event-frame">
+
+    <div class="inner-grid">
+        <p class="title">@Title</p>
+
+        <div class="seperator"></div>
+
+        <div class="statistics">
+            <p><i class="fa-solid fa-arrows-left-right"></i> @Distance</p>
+            <p><i class="fa-solid fa-calendar"></i> @StartTime.ToShortDateString() @StartTime.ToShortTimeString() - @EndTime.ToString("t")</p>
+            <p><i class="fa-solid fa-location-dot"></i> @Location</p>
+            <p><i class="fa-solid fa-chart-bar"></i> @AthletesCount Athletes | @LapCount Laps</p>
+        </div>
+
+    </div>
+
+    <div class="course-img">
+        Course IMG
+    </div>
+
+</div>
+
+@code {
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public float Distance { get; set; }
+
+    [Parameter]
+    public DateTime StartTime { get; set; }
+
+    [Parameter]
+    public DateTime EndTime { get; set; }
+
+    [Parameter]
+    public string? Location { get; set; }
+
+    [Parameter]
+    public int AthletesCount { get; set; }
+
+    [Parameter]
+    public int LapCount { get; set; }
+}

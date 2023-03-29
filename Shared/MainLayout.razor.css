@@ -2,6 +2,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    height: 100vh;
 }
 
 main {
@@ -48,6 +49,7 @@ main {
 @media (min-width: 641px) {
     .page {
         flex-direction: row;
+        height: 100vh;
     }
 
     .sidebar {

@@ -2,7 +2,7 @@ using CharityScanWebApp.Entities;
 using CharityScanWebApp.Helpers;
 using CharityScanWebApp.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.JSInterop;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +14,7 @@ builder.Services.AddScoped<BarcodeReaderService>();
 builder.Services.AddScoped<APIService>();
 builder.Services.AddScoped<SessionService>();
 builder.Services.AddBootstrapBlazor();
+builder.Services.AddMudServices();
 
 // Add WebAPI
 builder.Services.AddControllers();
