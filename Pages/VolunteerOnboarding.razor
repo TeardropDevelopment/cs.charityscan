@@ -1,5 +1,6 @@
 ﻿@page "/volunteer"
 @using System.Net;
+@using CharityScanWebApp.Abstractions;
 @using CharityScanWebApp.Helpers;
 @using CharityScanWebApp.Services;
 @using Microsoft.JSInterop.Implementation;
@@ -10,7 +11,7 @@
 @inject NavigationManager uriHelper;
 @inject JsHelperService JsHelper;
 @inject BarcodeReaderService readerService;
-@inject APIService api;
+@inject IApiServiceFactory apiFactory;
 @inject SessionService session;
 
 <PageTitle>Volunteering</PageTitle>
@@ -19,9 +20,10 @@
 <div id="qr-reader" style="width: 100%;"></div>
 
 @code {
+    private ICharityScanApi api;
 
     // Pass the handler to httpclient(from you are calling api)
-    HttpClient client = new HttpClient(new HttpClientHandler()
+    private readonly HttpClient client = new HttpClient(new HttpClientHandler()
         {
             ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; }
         })
@@ -35,6 +37,8 @@
         try
         {
             if (!firstRender) return;
+
+            api = apiFactory.GetApiService();
 
             await readerService.StartAsync(nameof(QrCodeCallback), this);
         }

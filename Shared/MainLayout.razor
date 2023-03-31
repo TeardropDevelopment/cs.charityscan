@@ -3,15 +3,14 @@
 
 <PageTitle>CharityScan - Home</PageTitle>
 
-<div class="page">
+<div style="height: calc(100vh - 3.5em);">
     <MudThemeProvider/>
     <MudDialogProvider />
     <MudSnackbarProvider />
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+    
+    <NavMenu />
 
-    <main>
+    <main style="height: 100%">
         @Body
     </main>
 </div>

@@ -1,11 +1,12 @@
 ﻿using BootstrapBlazor.Components;
 using CharityScanWebApp.Abstractions;
-using MySqlX.XDevAPI;
+using MySqlX.XDevAPI; 
 
 namespace CharityScanWebApp.Services
 {
     public class APIService : ICharityScanApi
     {
+
         // Pass the handler to httpclient(from you are calling api)
         private readonly HttpClient client = new HttpClient(new HttpClientHandler()
         {

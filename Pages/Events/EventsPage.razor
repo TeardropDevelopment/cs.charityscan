@@ -1,0 +1,62 @@
+﻿@page "/events"
+@using CharityScanWebApp.Pages.Events;
+@using CharityScanWebApp.Services;
+@using MudBlazor
+@inject ConnectionService connection;
+
+<PageTitle>Events</PageTitle>
+
+
+@if (Events.Any())
+{
+    <MudCarousel Class="mud-height-full" ShowArrows="true" ShowBullets="false" EnableSwipeGesture="true" AutoCycle="true" TData="object">
+        @foreach (var e in Events)
+        {
+            <MudCarouselItem Transition="MudBlazor.Transition.Slide">
+                <EventItem Title="@e.title" AthletesCount="100" Distance="2.5f" LapCount="500" Location="Eggelsberg, Upper Austria" EndTime="@e.endTime" StartTime="@e.startTime" />
+            </MudCarouselItem>
+        }
+    </MudCarousel>
+}
+else
+{
+    <div class="h-100 d-flex align-items-center justify-content-center">
+        <div style="font-size: xx-large;">
+            <center>
+                <i class="fa-solid fa-heart-crack" style="color: #ff0000; margin: 25px; font-size: 50px;"></i>
+                <p>No running or upcoming events</p>
+
+                <p>Online: @connection.IsConnected</p>
+            </center>
+        </div>
+    </div>
+}
+
+@code {
+
+    private struct EventItemHelper
+    {
+
+        public DateTime startTime { get; set; }
+        public DateTime endTime { get; set; }
+        public string? title { get; set; }
+    }
+    private List<EventItemHelper> Events = new List<EventItemHelper>()
+    {
+        //new EventItemHelper { startTime = new DateTime(2023,4,21,11,0,0), endTime = new DateTime(2023,4,21,18,0,0), title="Ttile1"},
+        //new EventItemHelper { startTime = new DateTime(2023,4,24,11,0,0), endTime = new DateTime(2023,4,25,17,0,0), title="Ttile2"},
+        //new EventItemHelper { startTime = new DateTime(2023,4,26,11,0,0), endTime = new DateTime(2023,4,26,16,0,0), title="Ttile3"},
+        //new EventItemHelper { startTime = new DateTime(2023,4,27,11,0,0), endTime = new DateTime(2023,4,27,15,0,0), title="Ttile4"},
+        //new EventItemHelper { startTime = new DateTime(2023,4,28,11,0,0), endTime = new DateTime(2023,4,28,14,0,0), title="Ttile5"},
+    };
+
+    protected override void OnInitialized()
+    {
+        connection.ConnectionStatusChanged += (source, _isConnected) =>
+        {
+            StateHasChanged();
+        };
+    }
+}
+
+

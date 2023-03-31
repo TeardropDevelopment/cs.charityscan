@@ -1,49 +1,17 @@
 ﻿@page "/"
-@using CharityScanWebApp.Pages.Main;
-@using MudBlazor
+@using CharityScanWebApp.Helpers;
+@inject JsHelperService JS;
 
-<PageTitle>Index</PageTitle>
+<PageTitle>CharityScan - Home</PageTitle>
 
-@*<Carousel>
-    <MudCarouselItem Transition="MudBlazor.Transition.Slide">
-        <CharityScanWebApp.Pages.Main.EventItem />
-    </MudCarouselItem>
-    <MudCarouselItem Transition="MudBlazor.Transition.Slide">
-        <CharityScanWebApp.Pages.Main.EventItem />
-    </MudCarouselItem>
-    <MudCarouselItem Transition="MudBlazor.Transition.Slide">
-        <CharityScanWebApp.Pages.Main.EventItem />
-    </MudCarouselItem>
-</Carousel>*@
+NavMenu on top (Requirement)
 
+MastHead mit schneller erklärung (links)
 
+<h1>Hier was schönes einfügen :)</h1>
 
-<MudCarousel Class="mud-height-full" ShowArrows="true" ShowBullets="false" EnableSwipeGesture="true" AutoCycle="true" TData="object">
-    @foreach (var e in Events)
-    {
-        <MudCarouselItem Transition="MudBlazor.Transition.Slide">
-            <EventItem Title="@e.title" AthletesCount="100" Distance="2.5f" LapCount="500" Location="Eggelsberg, Upper Austria" EndTime="@e.endTime" StartTime="@e.startTime" />
-        </MudCarouselItem>   
-    }
-</MudCarousel>
+Wie funktionierts 
+       V
 
-@code {
-
-    private struct EventItemHelper
-    {
-
-        public DateTime startTime { get; set; }
-        public DateTime endTime { get; set; }
-        public string? title { get; set; }
-    }
-    private List<EventItemHelper> Events = new List<EventItemHelper>()
-    {
-        new EventItemHelper { startTime = new DateTime(2023,4,21,11,0,0), endTime = new DateTime(2023,4,21,18,0,0), title="Ttile1"},
-        new EventItemHelper { startTime = new DateTime(2023,4,24,11,0,0), endTime = new DateTime(2023,4,25,17,0,0), title="Ttile2"},
-        new EventItemHelper { startTime = new DateTime(2023,4,26,11,0,0), endTime = new DateTime(2023,4,26,16,0,0), title="Ttile3"},
-        new EventItemHelper { startTime = new DateTime(2023,4,27,11,0,0), endTime = new DateTime(2023,4,27,15,0,0), title="Ttile4"},
-        new EventItemHelper { startTime = new DateTime(2023,4,28,11,0,0), endTime = new DateTime(2023,4,28,14,0,0), title="Ttile5"},
-    };
-}
-
-
+- Sections
+-Footer
