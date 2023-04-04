@@ -33,7 +33,7 @@
     {
         OnStateChanged += (source, e) =>
         {
-            StateHasChanged();
+            this.InvokeAsync(() => this.StateHasChanged());
         };
     }
 
