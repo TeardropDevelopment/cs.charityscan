@@ -14,7 +14,7 @@ namespace CharityScanWebApp.Services
             ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; }
         })
         {
-            BaseAddress = new Uri("https://charityscan/api/v1/")
+            BaseAddress = new Uri("https://130.61.142.115/api/v1/")
             //BaseAddress = new Uri("https://192.168.50.5/api/v1/")
         };
 
