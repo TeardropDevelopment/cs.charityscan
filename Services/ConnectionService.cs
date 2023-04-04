@@ -2,6 +2,7 @@
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Timers;
+using static System.Net.WebRequestMethods;
 
 namespace CharityScanWebApp.Services
 {
@@ -30,14 +31,21 @@ namespace CharityScanWebApp.Services
         public ConnectionService()
         {
             TestConnection();
+        }
 
-            // Start timer for periodically check if youre back online
-            System.Timers.Timer timer = new(TimeSpan.FromMinutes(0.5f))
+        public bool IsConnectedToInternet()
+        {
+            Ping p = new Ping();
+            try
             {
-                AutoReset = true,
-                Enabled = true
-            };
-            timer.Elapsed += OnTimerElapsed;
+                PingReply reply = p.Send(connTestUrl, 3000);
+                if (reply.Status == IPStatus.Success)
+                {
+                    IsConnected = true;
+                }
+            }
+            catch(Exception ex) { Console.WriteLine(ex.Message); }
+            return IsConnected;
         }
 
         public void TestConnection()
@@ -62,11 +70,6 @@ namespace CharityScanWebApp.Services
                 Console.WriteLine(ex);
                 IsConnected = false;
             }
-        }
-
-        private void OnTimerElapsed(object? sender, ElapsedEventArgs e)
-        {
-            TestConnection();
         }
     }
 }

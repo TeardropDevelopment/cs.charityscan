@@ -38,8 +38,6 @@
         {
             if (!firstRender) return;
 
-            api = apiFactory.GetApiService();
-
             await readerService.StartAsync(nameof(QrCodeCallback), this);
         }
         catch (Exception ex)
@@ -110,6 +108,8 @@
     {
         try
         {
+            api = apiFactory.GetApiService();
+
             int eventId = await session.GetEventId();
             bool success;
 

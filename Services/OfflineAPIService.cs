@@ -1,4 +1,5 @@
 ﻿using CharityScanWebApp.Abstractions;
+using CharityScanWebApp.Data;
 
 namespace CharityScanWebApp.Services
 {
@@ -30,7 +31,10 @@ namespace CharityScanWebApp.Services
         {
             try
             {
-                await _storageService.AddLapToStorageAsync(new Data.OfflineLap(eventId, code_value, starterNr));
+                if (int.TryParse(starterNr, out var startNr))
+                    await _storageService.AddLapToStorageAsync(new Data.OfflineLap(eventId, code_value, startNr));
+                else
+                    return false;
             }
             catch (Exception ex)
             {
@@ -38,6 +42,20 @@ namespace CharityScanWebApp.Services
             }
 
             return true;
+        }
+
+        public async Task<List<OfflineLap>> GetLapsAsync()
+        {
+            try
+            {
+                return await _storageService.GetLapListAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Console.WriteLine(ex);
+            }
+
+            return null;
         }
     }
 }

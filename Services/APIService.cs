@@ -1,5 +1,6 @@
 ﻿using BootstrapBlazor.Components;
 using CharityScanWebApp.Abstractions;
+using CharityScanWebApp.Data;
 using MySqlX.XDevAPI; 
 
 namespace CharityScanWebApp.Services
@@ -13,7 +14,7 @@ namespace CharityScanWebApp.Services
             ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; }
         })
         {
-            BaseAddress = new Uri("https://130.61.142.115/api/v1/")
+            BaseAddress = new Uri("https://charityscan/api/v1/")
             //BaseAddress = new Uri("https://192.168.50.5/api/v1/")
         };
 
@@ -30,5 +31,23 @@ namespace CharityScanWebApp.Services
 
             return response.IsSuccessStatusCode;
         }
+
+        public async Task<bool> UploadLapsAsync(List<OfflineLap>? laps)
+        {
+            try
+            {
+                if (laps == null) return true;
+
+                var response = await client.PostAsJsonAsync("laps/bulk", laps);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                System.Console.WriteLine(ex);
+            }
+
+            return false;
+        }
+
     }
 }

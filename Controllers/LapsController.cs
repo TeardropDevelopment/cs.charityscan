@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CharityScanWebApp.Entities;
+using CharityScanWebApp.Data;
+using Google.Protobuf.WellKnownTypes;
+using Microsoft.Extensions.Logging;
 
 namespace cs.api.charityscan.Controllers
 {
@@ -95,6 +98,31 @@ namespace cs.api.charityscan.Controllers
                 StarterNr = starter_nr,
                 Value = value
             });
+            await _context.SaveChangesAsync();
+
+            return StatusCode(StatusCodes.Status201Created);
+        }
+
+        // POST: api/Laps/bulk
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost("bulk")]
+        public async Task<ActionResult> PostLap([FromBody] List<OfflineLap> laps)
+        {
+            if (_context.Laps == null)
+            {
+                return Problem("Entity set 'CharityscanDevContext.Laps'  is null.");
+            }
+
+            foreach (var lap in laps)
+            {
+                _context.Laps.Add(new Lap
+                {
+                    EventId = lap.EventId,
+                    StarterNr = lap.StartNr,
+                    Value = lap.BarCodeValue ?? "UNKNOWN"
+                });
+            }
+
             await _context.SaveChangesAsync();
 
             return StatusCode(StatusCodes.Status201Created);

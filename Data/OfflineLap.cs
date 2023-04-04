@@ -8,7 +8,7 @@
             BarCodeValue = barCodeValue;
         }
 
-        public OfflineLap(int eventId, string? barCodeValue, string? startNr)
+        public OfflineLap(int eventId, string? barCodeValue, int startNr)
         {
             EventId = eventId;
             BarCodeValue = barCodeValue;
@@ -17,7 +17,7 @@
 
         public int EventId { get; set; }
         public string? BarCodeValue { get; set; }
-        public string? StartNr { get; set; }
+        public int? StartNr { get; set; } = null;
 
         
 

@@ -1,11 +1,13 @@
 ﻿using CharityScanWebApp.Data;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using System.Security.Cryptography.X509Certificates;
 
 namespace CharityScanWebApp.Services
 {
     public class LocalStorageService
     {
         private readonly ProtectedLocalStorage _localStorage;
+        private static int lapsStored = 0;
 
         public LocalStorageService(ProtectedLocalStorage localStorage) 
         {
@@ -14,19 +16,26 @@ namespace CharityScanWebApp.Services
 
         public async Task AddLapToStorageAsync(OfflineLap lap)
         {
-            var lapList = await GetLapListAsync();
-
-            lapList?.Add(lap);
-
-           await _localStorage.SetAsync("Saves a list of laps collected while being offline!", "offlineLaps", lapList ?? new List<OfflineLap>());
+           await _localStorage.SetAsync("Saves a list of laps collected while being offline!", "offlineLap" + lapsStored++, lap);
         }
 
         public async Task<List<OfflineLap>> GetLapListAsync()
         {
-            var lapList = (await _localStorage.GetAsync<List<OfflineLap>>("offlineLaps")).Value;
 
-            if (lapList == null)
-                lapList = new List<OfflineLap>();
+            List<OfflineLap>? lapList = new List<OfflineLap>();
+            try
+            {
+                for (int i = 0; i < lapsStored; i++)
+                {
+                    OfflineLap? lap = (await _localStorage.GetAsync<OfflineLap>("offlineLap" + i)).Value;
+                    if(lap != null)
+                        lapList.Add(lap);
+                }
+            }
+            catch (Exception ex)
+            {
+                await Console.Out.WriteLineAsync(ex.Message);
+            }
 
             return lapList;
         }

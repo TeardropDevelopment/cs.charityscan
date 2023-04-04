@@ -12,16 +12,9 @@ namespace CharityScanWebApp.Helpers
         private readonly IJSRuntime JS;
         private static object CreateDotNetObjectRefSyncObj = new();
 
-        public event EventHandler<bool> OnConnectionStateChange = delegate { };
-
-        private bool _isOnline = true;
-
         public JsHelperService(IJSRuntime js_runtime)
         {
             JS = js_runtime;
-
-            // Fire and forget
-            InvokeCallback("Connection.Initialize", nameof(ConnectionStatusChanged), this).ConfigureAwait(false);
         }
 
         #region Easier Invokes
@@ -68,20 +61,6 @@ namespace CharityScanWebApp.Helpers
         {
             // Fire & Forget: ConfigureAwait(false) is telling "I'm not expecting this call to return a thing"
             await JS.InvokeAsync<object>(js_function, CreateDotNetObjectRef(clazz), callback).ConfigureAwait(false);
-        }
-
-        #endregion
-
-        #region Connection
-
-        [JSInvokable]
-        private void ConnectionStatusChanged(bool isOnline)
-        {
-            if (_isOnline != isOnline)
-            {
-                _isOnline = isOnline;
-                OnConnectionStateChange(this, _isOnline);
-            }
         }
 
         #endregion
