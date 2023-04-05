@@ -7,7 +7,6 @@ namespace CharityScanWebApp.Services
     public class LocalStorageService
     {
         private readonly ProtectedLocalStorage _localStorage;
-        private static int lapsStored = 0;
 
         public LocalStorageService(ProtectedLocalStorage localStorage) 
         {
@@ -16,13 +15,16 @@ namespace CharityScanWebApp.Services
 
         public async Task AddLapToStorageAsync(OfflineLap lap)
         {
-           await _localStorage.SetAsync("Saves a list of laps collected while being offline!", "offlineLap" + lapsStored++, lap);
+            int lapsStored = await GetLapCounterAsync() + 1;
+            await _localStorage.SetAsync("Saves a list of laps collected while being offline!", "offlineLap" + lapsStored, lap);
+            await SetLapCounterAsync(lapsStored);
         }
 
         public async Task<List<OfflineLap>> GetLapListAsync()
         {
 
             List<OfflineLap>? lapList = new List<OfflineLap>();
+            int lapsStored = await GetLapCounterAsync();
             try
             {
                 for (int i = 0; i < lapsStored; i++)
@@ -39,5 +41,20 @@ namespace CharityScanWebApp.Services
 
             return lapList;
         }
+
+        #region Store Lapscounter for individuals
+
+        private async Task SetLapCounterAsync(int n)
+        {
+            await _localStorage.SetAsync("lapCounter", n);
+        }
+
+        private async Task<int> GetLapCounterAsync()
+        {
+            return (await _localStorage.GetAsync<int>("lapCounter")).Value;
+        }
+
+        #endregion
+
     }
 }
