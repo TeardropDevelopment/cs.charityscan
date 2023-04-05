@@ -44,7 +44,14 @@
     </div>
 
     <script src="_framework/blazor.server.js"></script>
-    <script>navigator.serviceWorker.register('service-worker.js');</script>
+
+    <environment include="Development">
+        <script>navigator.serviceWorker.register('service-worker.js');</script>
+    </environment>
+    <environment include="Staging,Production">
+        <script>navigator.serviceWorker.register('service-worker.published.js');</script>
+    </environment>
+
     <script src="_content/BootstrapBlazor/js/bootstrap.blazor.bundle.min.js"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
 
